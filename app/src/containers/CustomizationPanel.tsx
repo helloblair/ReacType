@@ -207,14 +207,8 @@ const CustomizationPanel = ({ isThemeLight }): JSX.Element => {
   };
 
   // function to pass into UseStateModal to use state to update attribute
-  const updateAttributeWithState = (attributeName, componentProviderId, statePropsRow, stateKey='') => {
+  const updateAttributeWithState = (attributeName, componentProviderId, statePropsId, statePropsRow, stateKey='', stateArray=[]) => {
 
-    // get the stateProps of the componentProvider    
-    // const currentComponent = state.components[componentProviderId - 1];
-    // const currentComponentProps = currentComponent.stateProps;
-    // const newInput = currentComponentProps[statePropsRow.id - 1].value;
-
-    console.log('stateKey', stateKey);
     const newInput = statePropsRow.value;
 
     if (attributeName === 'compText') {
@@ -222,10 +216,14 @@ const CustomizationPanel = ({ isThemeLight }): JSX.Element => {
       if (!newContextObj[componentProviderId]) {
         newContextObj[componentProviderId] = {};
       }
-      newContextObj[componentProviderId].compText = statePropsRow.id;
-      
+      newContextObj[componentProviderId].compText = statePropsId;
+
       // update/create stateUsed.compText
-      setStateUsedObj(Object.assign(stateUsedObj, {compText: stateKey}));
+      if (stateArray.length) {
+        setStateUsedObj(Object.assign(stateUsedObj, {compText: {stateKey: stateKey, stateArray: stateArray}}));
+      } else {
+        setStateUsedObj(Object.assign(stateUsedObj, {compText: stateKey}));
+      }
       setCompText(newInput);
       setUseContextObj(newContextObj);
     }
@@ -234,18 +232,17 @@ const CustomizationPanel = ({ isThemeLight }): JSX.Element => {
       if (!newContextObj[componentProviderId]) {
         newContextObj[componentProviderId] = {};
       }
-      newContextObj[componentProviderId].compLink = statePropsRow.id;
+      newContextObj[componentProviderId].compLink = statePropsId;
 
       // update/create stateUsed.compLink
-      setStateUsedObj(Object.assign(stateUsedObj, {compLink: stateKey}));
+      if (stateArray.length) {
+        setStateUsedObj(Object.assign(stateUsedObj, {compLink: {stateKey: stateKey, stateArray: stateArray}}));
+      } else {
+        setStateUsedObj(Object.assign(stateUsedObj, {compLink: stateKey}));
+      }
       setCompLink(newInput);
       setUseContextObj(newContextObj);
     }
-
-    // TODO: set something to signify that state was used
-    // so it can be handled in generateCode
-
-    // update use context object
 
   }
 

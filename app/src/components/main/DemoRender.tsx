@@ -37,26 +37,54 @@ const DemoRender = (props): JSX.Element => {
         }
 
         // check if innerText or activeLink is an array
-        const innerTextIsArray = Array.isArray(innerText);
-        const activeLinkIsArray = Array.isArray(activeLink);
+        // const innerTextIsArray = Array.isArray(innerText);
+        // const activeLinkIsArray = Array.isArray(activeLink);
         
-        if (innerTextIsArray || activeLinkIsArray) {
-          // determine how many elements to iterate over
-          let n;
-          if (innerTextIsArray && activeLinkIsArray) {
-            n = Math.min(innerText.length, activeLink.length);
-          } else {
-            n = innerTextIsArray ? innerText.length : activeLink.length;
-          }
-          // make a new element for each value of the array
-          for (let i = 0; i < n; i++) {
+        // if (innerTextIsArray || activeLinkIsArray) {
+        //   // determine how many elements to iterate over
+        //   let n;
+        //   if (innerTextIsArray && activeLinkIsArray) {
+        //     n = Math.min(innerText.length, activeLink.length);
+        //   } else {
+        //     n = innerTextIsArray ? innerText.length : activeLink.length;
+        //   }
+        //   // make a new element for each value of the array
+        //   for (let i = 0; i < n; i++) {
+        //     const elementCopy = JSON.parse(JSON.stringify(element));
+        //     elementCopy.attributes.compText = innerTextIsArray ? innerText[i] : innerText;
+        //     elementCopy.attributes.compLink = activeLinkIsArray ? activeLink[i] : activeLink;
+        //     componentsToRender.push(componentBuilder([elementCopy], key++));
+        //   }
+        //   continue;
+        // }
+
+        const compTextForEach = element.stateUsed && element.stateUsed.compText && element.stateUsed.compText.stateArray;
+        // const compLinkForEach = element.stateUsed && element.stateUsed.compLink && element.stateUsed.compLink.stateArray;
+        
+        // just text for now
+        if (compTextForEach) {
+          // parse through stateKey for properties to access, ignoring first (key to get array)
+          const properties = element.stateUsed.compText.stateKey.split('.').slice(1);
+          
+          // go through each element of array
+          for (const el of element.stateUsed.compText.stateArray) {
+            console.log('demo render loop', el);
+            
+            // access item
+            let result = el;
+            for (const property of properties) {
+              result = result[property];
+            }
+
+            // make a new copy of the html element with specific state array element
             const elementCopy = JSON.parse(JSON.stringify(element));
-            elementCopy.attributes.compText = innerTextIsArray ? innerText[i] : innerText;
-            elementCopy.attributes.compLink = activeLinkIsArray ? activeLink[i] : activeLink;
+            elementCopy.attributes.compText = result;
+            elementCopy.stateUsed.compText = '';
             componentsToRender.push(componentBuilder([elementCopy], key++));
           }
           continue;
         }
+
 
         if (elementType === 'input') componentsToRender.push(<Box component={elementType} className={classRender} style={elementStyle} key={key} id={`rend${childId}`}></Box>);
         else if (elementType === 'img') componentsToRender.push(<Box component={elementType} src={activeLink} className={classRender} style={elementStyle} key={key} id={`rend${childId}`}></Box>);

@@ -9,6 +9,9 @@ function UseStateModal({ updateAttributeWithState, attributeToChange, childId })
   const [open, setOpen] = useState(false);
   const [displayObject, setDisplayObject] = useState(null)
   const [stateKey, setStateKey] = useState('');
+  const [forEach, setForEach] = useState(false);
+  const [stateArray, setStateArray] = useState([]);
+  const [statePropsId, setStatePropsId] = useState(-1);
 
   // make buttons to choose which component to get state from
   const [componentProviderId, setComponentProviderId] = useState(1) // for now set to App
@@ -44,23 +47,32 @@ function UseStateModal({ updateAttributeWithState, attributeToChange, childId })
         <div className="useState-dropdown">
           {components}
         </div>
+        <div className="useState-forEach">
+          <button onClick={() => setForEach(!forEach)}>forEach (only to be used for arrays):  {String(forEach)}</button>
+        </div>
         <div className="useState-stateDisplay">
           <TableStateProps
             providerId = {componentProviderId}
             displayObject = {displayObject}
+            forEach = {forEach}
             selectHandler={(table) => {
+              if (statePropsId < 0) setStatePropsId(table.row.id);
               // if object => show object table
               if (table.row.type === "object") {
                 setStateKey(stateKey + table.row.key + '.');
                 setDisplayObject(table.row.value);
               } else if (table.row.type === "array") {
+                if (forEach && !stateArray.length) setStateArray(table.row.value);
                 setStateKey(stateKey + table.row.key)
                 setDisplayObject(table.row.value);
               } else {
                 // if not object => actually update state
                 setDisplayObject(null);
-                updateAttributeWithState(attributeToChange, componentProviderId, table.row, stateKey + table.row.key);
+                updateAttributeWithState(attributeToChange, componentProviderId, statePropsId, table.row, stateKey + table.row.key, stateArray);
+                setForEach(false);
+                setStateArray([]);
                 setStateKey('')
+                setStatePropsId(-1);
                 setOpen(false);
               }
             }}
