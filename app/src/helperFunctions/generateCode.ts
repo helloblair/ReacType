@@ -123,8 +123,11 @@ const generateUnformattedCode = (
 
   // function to dynamically generate a complete html (& also other library type) elements
   const elementGenerator = (childElement: object, level: number = 2) => {
+    let result = '';
+
     let innerText = '';
     let activeLink = '';
+    
 
     if (childElement.attributes && childElement.attributes.compText) {
       if (childElement.stateUsed && childElement.stateUsed.compText) {
@@ -153,24 +156,37 @@ const generateUnformattedCode = (
     childElement.tag === 'Switch' ||
     childElement.tag === 'Route';
 
+    const compTextForEach = childElement.stateUsed && childElement.stateUsed.compText && childElement.stateUsed.compText.stateArray
+    if (compTextForEach) {
+      // get array key 
+      const arrayKey = childElement.stateUsed.compText.stateKey.split('[')[0];
+      result += `for (let i = 0; i <${arrayKey}.length; i++) {
+        `;
+      // console.log("['abc','xyz']".replace(/[\[\]']+/g,''));
+    }
+
+
     if (childElement.tag === 'img') {
-      return `${levelSpacer(level, 5)}<${childElement.tag} src=${activeLink} ${elementTagDetails(childElement)}/>${levelSpacer(2, (3 + level))}`;
+      result += `${levelSpacer(level, 5)}<${childElement.tag} src=${activeLink} ${elementTagDetails(childElement)}/>${levelSpacer(2, (3 + level))}`;
     } else if (childElement.tag === 'a') {
-      return `${levelSpacer(level, 5)}<${childElement.tag} href=${activeLink} ${elementTagDetails(childElement)}>${innerText}</${childElement.tag}>${levelSpacer(2, (3 + level))}`;
+      result +=  `${levelSpacer(level, 5)}<${childElement.tag} href=${activeLink} ${elementTagDetails(childElement)}>${innerText}</${childElement.tag}>${levelSpacer(2, (3 + level))}`;
     } else if (childElement.tag === 'input') {
-      return `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}></${childElement.tag}>${levelSpacer(2, (3 + level))}`;
+      result += `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}></${childElement.tag}>${levelSpacer(2, (3 + level))}`;
     } else if (childElement.tag === 'LinkTo') {
-      return `${levelSpacer(level, 5)}<Link to=${activeLink}${elementTagDetails(childElement)}>${innerText}
+      result += `${levelSpacer(level, 5)}<Link to=${activeLink}${elementTagDetails(childElement)}>${innerText}
         ${tabSpacer(level)}${writeNestedElements(childElement.children, level + 1)}
         ${tabSpacer(level - 1)}</Link>${levelSpacer(2, (3 + level))}`;
     } else if (nestable) {
       const routePath = (childElement.tag === 'Route') ? (' ' + 'exact path=' + activeLink) : '';
-      return `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}${routePath}>${innerText}
+      result += `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}${routePath}>${innerText}
         ${tabSpacer(level)}${writeNestedElements(childElement.children, level + 1)}
         ${tabSpacer(level - 1)}</${childElement.tag}>${levelSpacer(2, (3 + level))}`;
     } else if (childElement.tag !== 'separator'){
-      return `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}>${innerText}</${childElement.tag}>${levelSpacer(2, (3 + level))}`;
+      result += `${levelSpacer(level, 5)}<${childElement.tag}${elementTagDetails(childElement)}>${innerText}</${childElement.tag}>${levelSpacer(2, (3 + level))}`;
     }
+
+    if (compTextForEach) result += '}';
+    return result; 
   }
 
   // write all code that will be under the "return" of the component
